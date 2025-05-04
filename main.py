@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def generateHashTable(points):
     n = len(points)
     print(f"{n=}")
-    m = int(sympy.nextprime(np.sqrt(n)))  #type:ignore
+    m = int(sympy.nextprime(np.sqrt(n * 1.01)))  #type:ignore
     print(f"{m=}")
     increment_factor = 1.2
     r = int(np.sqrt(n) / 2)
@@ -47,7 +47,7 @@ def generateHashTable(points):
             h[ghs[:, 1], ghs[:, 0]] = g[:, :2]
             i += 1
             oc = 0
-            random_start = np.random.randint(0, r - 1)
+            random_start = np.random.randint(0, r**2 - 1)
         else:
             offseti = g[0, 2:]  # (k[2], k[3]) in order (x, y)
             oc += 1
@@ -64,8 +64,8 @@ def generateHashTable(points):
 
 
 if __name__ == "__main__":
-    px = np.random.choice(np.arange(1000), size=100)
-    py = np.random.choice(np.arange(1000), size=100)
+    px = np.random.choice(np.arange(1000), size=1000)
+    py = np.random.choice(np.arange(1000), size=1000)
     ps = np.array([px, py]).T
     i=15
     while (i>=0):
