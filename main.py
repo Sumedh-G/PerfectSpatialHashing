@@ -13,11 +13,8 @@ def generateHashTable(points):
 
     h0 = np.array(points % m, dtype="int64")
     h1 = np.array(points % r, dtype="int64")
-    print(f"Starting with {h1=}")
-    print(np.column_stack((h0, h1)))
 
     phashes = np.unique(np.column_stack((h0, h1)), axis=0)
-    print(f"Stating with {phashes=}")
     while len(phashes) != n:
         print(f"Trying {r=}", end="\r", flush=True)
         r = int(r * increment_factor)
@@ -27,41 +24,35 @@ def generateHashTable(points):
     h1 = np.array(points % r, dtype="int64")
     phashes = np.unique(np.column_stack((h0, h1)), axis=0)
     print(f"Settled on {r=}")
-    print(f"{h0=}")
-    print(f"{h1=}")
 
-    print(f"{phashes=}")
     groups = [phashes[np.all(phashes[:, 2:] == k, axis=1)] for k in np.unique(h1, axis=0)][::-1]
-    print("Created groups")
 
     phi = np.zeros((r, r, 2), dtype="int64")
     h = np.zeros((m, m, 2), dtype="int64") - 1
 
-    getHash = lambda k : (k[:2] + phi[k[3]][k[2]]) % m
     i = 0
     oc = 0
     while i < len(groups):
-        valid = True
-        for g in groups[i]:
-            gh = getHash(g)
-            if np.all(h[gh[1]][gh[0]] != np.array([-1, -1])):
-                valid = False
+        g = groups[i]                         # shape: (G, N)
+        k12 = g[:, :2]                        # shape: (G, 2)
+        phi_lookup = phi[g[:, 3], g[:, 2]]   # shape: (G, 2)
+        ghs = (k12 + phi_lookup) % m         # shape: (G, 2)
+
+        # Lookup in h using computed hashes
+        selected = h[ghs[:, 1], ghs[:, 0]]   # shape: (G, 2)
+        valid = not np.any(np.all(selected != [-1, -1], axis=1))  # If ANY already-filled slot exists, invalid
 
         if valid:
-            for g in groups[i]:
-                gh = getHash(g)
-                h[gh[1]][gh[0]] = g[:2]
+            # Update h[gh[1], gh[0]] = g[:2] in bulk
+            h[ghs[:, 1], ghs[:, 0]] = g[:, :2]
             i += 1
             oc = 0
-            random_start = np.random.randint(0, r-1)
-            print("OffsetFound")
+            random_start = np.random.randint(0, r - 1)
         else:
-            offseti = groups[i][0][2:]
+            offseti = g[0, 2:]  # (k[2], k[3]) in order (x, y)
             oc += 1
-            print(f"{oc=}", end="\r", flush=True)
             assert oc < m**2, "oc exploded"
-            phi[offseti[1]][offseti[0]] = np.array([(random_start + oc) % m, (random_start + oc) // m])
-    print()
+            phi[offseti[1], offseti[0]] = np.array([(random_start + oc) % m, (random_start + oc) // m])
 
     # Fun visualization cause why not
     plt.imshow(h[:, :, 0] + h[:, :, 1])
@@ -73,8 +64,8 @@ def generateHashTable(points):
 
 
 if __name__ == "__main__":
-    px = np.random.choice(np.arange(100000), size=10000)
-    py = np.random.choice(np.arange(100000), size=10000)
+    px = np.random.choice(np.arange(10000000), size=5000)
+    py = np.random.choice(np.arange(10000000), size=5000)
     ps = np.array([px, py]).T
     while True:
         try:
