@@ -62,6 +62,8 @@ def generateHashTable(points):
             phi[offseti[1]][offseti[0]] = np.array([oc % m, oc // m])
             print(f"{phi=}")
 
+    return m, r, phi
+
 
 if __name__ == "__main__":
     generateHashTable(
