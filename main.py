@@ -7,8 +7,9 @@ def generateHashTable(points):
     print(f"{n=}")
     m = int(sympy.nextprime(np.sqrt(n)))  #type:ignore
     print(f"{m=}")
-    increment_factor = 2
-    r = int(np.sqrt(n) / (increment_factor))
+    increment_factor = 1.2
+    r = int(np.sqrt(n) / 2)
+    print(f"Initial {r=}")
 
     h0 = np.array(points % m, dtype="int64")
     h1 = np.array(points % r, dtype="int64")
@@ -18,20 +19,20 @@ def generateHashTable(points):
     phashes = np.unique(np.column_stack((h0, h1)), axis=0)
     print(f"Stating with {phashes=}")
     while len(phashes) != n:
-        print(f"Trying {r=}")
-        r *= increment_factor
+        print(f"Trying {r=}", end="\r", flush=True)
+        r = int(r * increment_factor)
         h1 = np.array(points % r, dtype="int64")
         phashes = np.unique(np.column_stack((h0, h1)), axis=0)
 
     h1 = np.array(points % r, dtype="int64")
     phashes = np.unique(np.column_stack((h0, h1)), axis=0)
-    print(f"{r=}")
+    print(f"Settled on {r=}")
     print(f"{h0=}")
     print(f"{h1=}")
 
     print(f"{phashes=}")
-    groups = [[p for p in phashes if np.all(p[2:] == k)] for k in np.unique(h1, axis=0)][::-1]
-    print(f"{groups=}")
+    groups = [phashes[np.all(phashes[:, 2:] == k, axis=1)] for k in np.unique(h1, axis=0)][::-1]
+    print("Created groups")
 
     phi = np.zeros((r, r, 2), dtype="int64")
     h = np.zeros((m, m, 2), dtype="int64") - 1
@@ -43,7 +44,6 @@ def generateHashTable(points):
         valid = True
         for g in groups[i]:
             gh = getHash(g)
-            print(f"{gh=}")
             if np.all(h[gh[1]][gh[0]] != np.array([-1, -1])):
                 valid = False
 
@@ -51,27 +51,34 @@ def generateHashTable(points):
             for g in groups[i]:
                 gh = getHash(g)
                 h[gh[1]][gh[0]] = g[:2]
-            print(f"{h=}")
             i += 1
             oc = 0
+            random_start = np.random.randint(0, r-1)
+            print("OffsetFound")
         else:
             offseti = groups[i][0][2:]
-            print(f"{offseti=}")
             oc += 1
-            print(f"{oc=}")
+            print(f"{oc=}", end="\r", flush=True)
             assert oc < m**2, "oc exploded"
-            phi[offseti[1]][offseti[0]] = np.array([oc % m, oc // m])
-            print(f"{phi=}")
+            phi[offseti[1]][offseti[0]] = np.array([(random_start + oc) % m, (random_start + oc) // m])
+    print()
 
     # Fun visualization cause why not
     plt.imshow(h[:, :, 0] + h[:, :, 1])
+    plt.show()
+    plt.imshow(phi[:, :, 0] + phi[:, :, 1])
     plt.show()
 
     return m, r, phi
 
 
 if __name__ == "__main__":
-    px = np.random.choice(np.arange(1000000), size=5000)
-    py = np.random.choice(np.arange(1000000), size=5000)
+    px = np.random.choice(np.arange(100000), size=10000)
+    py = np.random.choice(np.arange(100000), size=10000)
     ps = np.array([px, py]).T
-    generateHashTable(ps)
+    while True:
+        try:
+            generateHashTable(ps)
+            break
+        except AssertionError:
+            print("Failed trial, restarting...")
