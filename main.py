@@ -1,5 +1,6 @@
 import sympy
 import numpy as np
+import matplotlib.pyplot as plt
 
 def generateHashTable(points):
     n = len(points)
@@ -62,10 +63,15 @@ def generateHashTable(points):
             phi[offseti[1]][offseti[0]] = np.array([oc % m, oc // m])
             print(f"{phi=}")
 
+    # Fun visualization cause why not
+    plt.imshow(h[:, :, 0] + h[:, :, 1])
+    plt.show()
+
     return m, r, phi
 
 
 if __name__ == "__main__":
-    generateHashTable(
-        np.array([[1, 2], [4, 5], [13, 45], [11, 17], [15, 45]])
-    )
+    px = np.random.choice(np.arange(1000000), size=5000)
+    py = np.random.choice(np.arange(1000000), size=5000)
+    ps = np.array([px, py]).T
+    generateHashTable(ps)
