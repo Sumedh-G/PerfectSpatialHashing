@@ -55,21 +55,26 @@ def generateHashTable(points):
             phi[offseti[1], offseti[0]] = np.array([(random_start + oc) % m, (random_start + oc) // m])
 
     # Fun visualization cause why not
-    plt.imshow(h[:, :, 0] + h[:, :, 1])
+    plt.imshow((h[:, :, 0] != -1) & (h[:, :, 1] != -1))
     plt.show()
-    plt.imshow(phi[:, :, 0] + phi[:, :, 1])
+    plt.imshow((phi[:, :, 0] != 0) & (phi[:, :, 1] != 0))
     plt.show()
 
     return m, r, phi
 
 
 if __name__ == "__main__":
-    px = np.random.choice(np.arange(10000000), size=5000)
-    py = np.random.choice(np.arange(10000000), size=5000)
+    px = np.random.choice(np.arange(1000), size=100)
+    py = np.random.choice(np.arange(1000), size=100)
     ps = np.array([px, py]).T
-    while True:
+    i=15
+    while (i>=0):
         try:
             generateHashTable(ps)
             break
         except AssertionError:
-            print("Failed trial, restarting...")
+            print(f"Failed trial {15-i}, restarting...")
+            i -= 1
+    else:
+        print("Finished all trials")
+
