@@ -1,7 +1,7 @@
 from sympy import gcd
 import numpy as np
 import matplotlib.pyplot as plt
-
+# import pdb; pdb.set_trace()
 
 def generateHashTable(points):
     n = len(points)
@@ -22,10 +22,10 @@ def generateHashTable(points):
         if (int(gcd(m, r)) not in [1, r]): #type:ignore
             print(f"Invalid {gcd(m, r) = }, {m} {r}")
             continue
-        print(f"{len(phashes)=}")
 
         h1 = np.array(points % r, dtype="int64")
         phashes = np.unique(np.column_stack((h0, h1)), axis=0)
+        print(f"{len(phashes)=}")
 
     h1 = np.array(points % r, dtype="int64")
     phashes = np.unique(np.column_stack((h0, h1)), axis=0)
@@ -39,10 +39,11 @@ def generateHashTable(points):
             phi = np.zeros((r, r, 2), dtype="int64") - 1
             h = np.zeros((m, m, 2), dtype="int64") - 1
 
-            i = 1
+            group_index = 1
             oc = 0
-            while i <= len(groups):
-                g = groups[-i]                         # shape: (G, N)
+            while group_index <= (groups_l:=len(groups)):
+                print(f"({group_index}/{groups_l})".ljust(20), end="\r", flush=True)
+                g = groups[-group_index]                         # shape: (G, N)
                 k12 = g[:, :2]                        # shape: (G, 2)
                 phi_lookup = phi[g[:, 3], g[:, 2]]   # shape: (G, 2)
                 ghs = (k12 + phi_lookup) % m         # shape: (G, 2)
@@ -54,7 +55,7 @@ def generateHashTable(points):
                 if valid:
                     # Update h[gh[1], gh[0]] = g[:2] in bulk
                     h[ghs[:, 1], ghs[:, 0]] = g[:, :2]
-                    i += 1
+                    group_index += 1
                     oc = 0
                     random_start = np.random.randint(0, m**2 - 1)
                     # print(f"Start: {oc=}, {random_start=}")
@@ -65,9 +66,11 @@ def generateHashTable(points):
                     phi[offseti[1], offseti[0]] = np.array([(random_start + oc) % m, ((random_start + oc) // m) % m])
                     # print(f"({(random_start + oc) % m = }, {((random_start + oc) // m) % m = }), {oc=} {m=}")
 
+            print("--------SUCCESS--------")
             break
         except AssertionError:
             pass
+            print("---------RESET---------")
 
 
     print(f"{n=}")
@@ -81,8 +84,8 @@ def generateHashTable(points):
 
     return m, r, phi
 
-GRIDSIZE = 5000
-POINTS = 5000
+GRIDSIZE = 1000
+POINTS = 1000
 if __name__ == "__main__":
     ps = np.arange(GRIDSIZE ** 2)
     np.random.shuffle(ps)
