@@ -27,7 +27,7 @@ def generateHashTable(points):
 
     groups = [phashes[np.all(phashes[:, 2:] == k, axis=1)] for k in np.unique(h1, axis=0)][::-1]
 
-    phi = np.zeros((r, r, 2), dtype="int64")
+    phi = np.random.randint(0, m-1, (r, r, 2), dtype="int64")
     h = np.zeros((m, m, 2), dtype="int64") - 1
 
     i = 0
@@ -57,7 +57,7 @@ def generateHashTable(points):
     # Fun visualization cause why not
     plt.imshow((h[:, :, 0] != -1) & (h[:, :, 1] != -1))
     plt.show()
-    plt.imshow((phi[:, :, 0] != 0) & (phi[:, :, 1] != 0))
+    plt.imshow((phi[:, :, 0] != -1) & (phi[:, :, 1] != 0))
     plt.show()
 
     return m, r, phi
@@ -67,13 +67,13 @@ if __name__ == "__main__":
     px = np.random.choice(np.arange(1000), size=1000)
     py = np.random.choice(np.arange(1000), size=1000)
     ps = np.array([px, py]).T
-    i=15
+    i=100
     while (i>=0):
         try:
             generateHashTable(ps)
             break
         except AssertionError:
-            print(f"Failed trial {15-i}, restarting...")
+            print(f"Failed trial {100-i}, restarting...")
             i -= 1
     else:
         print("Finished all trials")
