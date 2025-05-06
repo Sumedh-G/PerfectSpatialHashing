@@ -27,8 +27,6 @@ def generateHashTable(points):
         phashes = np.unique(np.column_stack((h0, h1)), axis=0)
         print(f"{len(phashes)=}")
 
-    h1 = np.array(points % r, dtype="int64")
-    phashes = np.unique(np.column_stack((h0, h1)), axis=0)
     print(f"Settled on {r=}")
 
     groups = [phashes[np.all(phashes[:, 2:] == k, axis=1)] for k in np.unique(h1, axis=0)]
